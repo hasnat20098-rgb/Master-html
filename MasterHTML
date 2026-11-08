@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QH MASTER CONTROL</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
+body{background:#0a0e1a;color:#fff;padding:12px}
+.top{background:linear-gradient(135deg,#ff0000,#ff9800);padding:18px;border-radius:16px;text-align:center}
+.top h1{font-size:22px}
+.badge{background:#fff;color:#000;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:bold}
+.card{background:#151c2e;border:1px solid #2a3550;border-radius:16px;padding:16px;margin-top:12px}
+.row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #2a3550}
+.row:last-child{border:none}
+button{padding:12px;border:none;border-radius:10px;font-weight:bold;cursor:pointer;width:100%;margin-top:10px;font-size:15px}
+.btn-green{background:#00e676}
+.btn-red{background:#ff1744;color:#fff}
+.btn-blue{background:#2575fc;color:#fff}
+input,textarea,select{width:100%;padding:12px;border-radius:10px;border:1px solid #2a3550;background:#0a0e1a;color:#fff;margin-top:6px}
+.switch{width:60px;height:30px;background:#ff1744;border-radius:30px;position:relative;cursor:pointer;flex-shrink:0}
+.switch.on{background:#00e676}
+.knob{position:absolute;top:3px;left:3px;width:24px;height:24px;background:#fff;border-radius:50%;transition:.3s}
+.switch.on .knob{left:33px}
+.small{font-size:12px;color:#9aa7c7}
+.big{font-size:32px;text-align:center;font-weight:bold}
+</style>
+</head>
+<body>
+
+<div class="top">
+<h1>👑 QH MASTER CONTROL</h1>
+<div class="badge">ADMIN ONLY - তুমি Boss</div>
+<div style="margin-top:8px">Total Apps: <b id="totalApps">4</b> | ON: <b id="onApps" style="color:#00e676">4</b></div>
+</div>
+
+<div class="card">
+<b>🚨 EMERGENCY - সব বন্ধ</b>
+<div class="small">এক চাপে তোমার সব অ্যাপ বন্ধ হই যাইবো!</div>
+<button class="btn-red" id="killBtn" onclick="killAll()">🔴 সব অ্যাপ বন্ধ করো</button>
+<button class="btn-green" id="openBtn" onclick="openAll()" style="display:none">🟢 সব অ্যাপ চালু করো</button>
+</div>
+
+<div class="card">
+<b>📱 তোমার সব অ্যাপ</b>
+<div id="appList"></div>
+<button class="btn-blue" onclick="addApp()">+ নতুন অ্যাপ Add করো</button>
+</div>
+
+<div class="card">
+<b>📢 সব অ্যাপে মেসেজ পাঠাও</b>
+<textarea id="msg" placeholder="যেমন: আজ রাইত ৮টায় Signal বন্ধ থাকবো"></textarea>
+<button class="btn-blue" onclick="sendMsg()">সবাইরে মেসেজ পাঠাও</button>
+<div id="msgShow" class="small" style="margin-top:8px;text-align:center"></div>
+</div>
+
+<div class="card">
+<b>⚙️ Global Setting - সব অ্যাপে একলগে</b>
+<b style="margin-top:10px;display:block">Accuracy</b>
+<select id="globalAcc" onchange="changeAcc()">
+<option>92%</option><option>94%</option><option>96%</option><option>88%</option>
+</select>
+<b style="margin-top:10px;display:block">Daily Signal Limit</b>
+<select id="globalLimit" onchange="changeLimit()">
+<option>10 টা</option><option>5 টা</option><option>20 টা</option><option>Unlimited</option>
+</select>
+<div class="small" style="margin-top:8px;text-align:center" id="globalShow">সব অ্যাপে এখন: 92% | 10 টা Signal</div>
+</div>
+
+<div class="card">
+<b>📊 আজকের Hisab</b>
+<div class="big" id="totalWin">0 WIN</div>
+<div style="text-align:center" class="small">তোমার সব অ্যাপ মিলাইয়া</div>
+<button class="btn-blue" onclick="addWin()">+ 1 WIN Add করো</button>
+</div>
+
+<script>
+let apps = [
+  {name:"QH Official V4", users:12, on:true},
+  {name:"Signal Pro App", users:8, on:true},
+  {name:"Scanner App", users:5, on:true},
+  {name:"Demo Trader", users:3, on:true},
+];
+
+function render(){
+  let html="";
+  apps.forEach((a,i)=>{
+    html+=`<div class="row"><div><b>${a.name}</b><div class="small">${a.users} জন চালাইতেছে - ${a.on?"🟢 ON":"🔴 OFF"}</div></div><div class="switch ${a.on?"on":""}" onclick="toggleApp(${i})"><div class="knob"></div></div></div>`;
+  });
+  document.getElementById('appList').innerHTML=html;
+  document.getElementById('totalApps').innerText=apps.length;
+  document.getElementById('onApps').innerText=apps.filter(a=>a.on).length;
+  // Save - যাতে অন্য অ্যাপ পড়তে পারে
+  localStorage.setItem('qh_master', JSON.stringify(apps));
+}
+function toggleApp(i){
+  apps[i].on=!apps[i].on;
+  render();
+  alert(apps[i].name + (apps[i].on ? " চালু হইছে 🟢" : " বন্ধ হইছে 🔴"));
+}
+function killAll(){
+  apps.forEach(a=>a.on=false); render();
+  document.getElementById('killBtn').style.display="none";
+  document.getElementById('openBtn').style.display="block";
+  alert("সব অ্যাপ বন্ধ! 🔴");
+}
+function openAll(){
+  apps.forEach(a=>a.on=true); render();
+  document.getElementById('killBtn').style.display="block";
+  document.getElementById('openBtn').style.display="none";
+  alert("সব অ্যাপ চালু! 🟢");
+}
+function addApp(){
+  let n=prompt("নতুন অ্যাপের নাম কি?");
+  if(n){ apps.push({name:n, users:0, on:true}); render(); }
+}
+function sendMsg(){
+  let m=document.getElementById('msg').value;
+  if(!m) return alert("মেসেজ লেখো!");
+  localStorage.setItem('qh_msg', m);
+  document.getElementById('msgShow').innerText="✅ পাঠানো হইছে: "+m;
+  alert("সব অ্যাপে মেসেজ চইলা গেছে!");
+}
+function changeAcc(){
+  let a=document.getElementById('globalAcc').value;
+  let l=document.getElementById('globalLimit').value;
+  document.getElementById('globalShow').innerText=`সব অ্যাপে এখন: ${a} | ${l} Signal`;
+}
+function changeLimit(){ changeAcc(); }
+let wins=0;
+function addWin(){ wins++; document.getElementById('totalWin').innerText=wins+" WIN"; }
+render();
+</script>
+</body>
+</html>
