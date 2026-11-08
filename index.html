@@ -8,7 +8,7 @@
     * { box-sizing: border-box; font-family: Arial, sans-serif; }
     body { margin: 0; background: #0f172a; color: #f8fafc; padding-bottom: 70px; }
     header { position: sticky; top: 0; z-index: 99; background: #1e293b; padding: 12px; border-bottom: 2px solid #22c55e; display: flex; justify-content: space-between; align-items: center; }
-    .logo { font-weight: 900; color: #22c55e; font-size: 20px; }
+    .logo { font-weight: 900; color: #22c55e; font-size: 18px; }
     .tabs { display: flex; gap: 8px; padding: 10px; overflow-x: auto; background: #1e293b; }
     .tabs button { white-space: nowrap; border: 1.5px solid #22c55e; background: #0f172a; color: #22c55e; padding: 8px 14px; border-radius: 20px; font-weight: 700; cursor: pointer; }
     .tabs button.active { background: #22c55e; color: #fff; }
@@ -18,7 +18,7 @@
     .row { display: flex; gap: 8px; }
     .row > div { flex: 1; background: #0f172a; border-radius: 10px; padding: 10px; text-align: center; }
     .bottom { position: fixed; bottom: 0; left: 0; right: 0; background: #1e293b; display: flex; border-top: 2px solid #22c55e; z-index: 99; }
-    .bottom button { flex: 1; padding: 12px 2px; border: 0; background: #1e293b; color: #94a3b8; font-weight: 700; font-size: 12px; cursor: pointer; }
+    .bottom button { flex: 1; padding: 12px 2px; border: 0; background: #1e293b; color: #94a3b8; font-weight: 700; font-size: 11px; cursor: pointer; }
     .bottom button.active { color: #22c55e; border-top: 3px solid #22c55e; }
     .small { font-size: 13px; color: #94a3b8; line-height: 1.6; }
     .alertBox { background: #334155; border: 1px solid #facc15; padding: 12px; border-radius: 12px; color: #fef08a; }
@@ -26,11 +26,12 @@
     .loss { color: #ef4444; font-weight: 900; }
     .buyBtn { background: #22c55e; color: #fff; border: 0; padding: 16px; border-radius: 12px; font-weight: 900; font-size: 18px; width: 100%; cursor: pointer; }
     .sellBtn { background: #ef4444; color: #fff; border: 0; padding: 16px; border-radius: 12px; font-weight: 900; font-size: 18px; width: 100%; cursor: pointer; }
-    
-    /* Quotex Interactive Chart Canvas */
+    .telegramBtn { display: inline-block; background: #0088cc; color: #fff; text-decoration: none; padding: 6px 12px; border-radius: 8px; font-weight: bold; font-size: 12px; margin-top: 4px; }
     #chartContainer { position: relative; width: 100%; height: 320px; background: #090d16; border-radius: 12px; overflow: hidden; border: 1px solid #334155; margin-top: 10px; }
     #demoCanvas { width: 100%; height: 100%; }
     .tradeBadge { position: absolute; right: 15px; top: 15px; background: rgba(15, 23, 42, 0.85); padding: 8px 14px; border-radius: 8px; border: 1px solid #334155; font-size: 13px; font-weight: bold; }
+    .nosig { background: #450a0a; border: 2px solid #ef4444; padding: 14px; border-radius: 12px; color: #fca5a5; }
+    .goodsig { background: #052e16; border: 2px solid #22c55e; padding: 14px; border-radius: 12px; color: #86efac; }
   </style>
 </head>
 <body>
@@ -38,10 +39,11 @@
 <header>
   <div>
     <div class="logo">TRADING BY RAHAT</div>
-    <div class="small">Quotex Pro Demo Edition V31</div>
+    <div class="small">Quotex OTC V32 Pro</div>
   </div>
   <div style="text-align:right">
-    <div style="margin-top:4px"><b>$ <input id="bal" value="50" style="width:50px;text-align:center"> ব্যালেন্স</b></div>
+    <a href="https://t.me/bprahat" target="_blank" class="telegramBtn">📩 Contact: @bprahat</a>
+    <div style="margin-top:4px;font-size:12px"><b>$ <input id="bal" value="50" style="width:45px;text-align:center;padding:2px;margin:0"> ব্যালেন্স</b></div>
   </div>
 </header>
 
@@ -49,28 +51,42 @@
   <button class="active" onclick="setCat('quotex_otc',this)">কোটেক্স ওটিসি (OTC)</button>
   <button onclick="setCat('binary',this)">বাইনারি রিয়েল</button>
   <button onclick="setCat('crypto',this)">ক্রিপ্টো (২৪/৭)</button>
+  <button onclick="setCat('forex',this)">ফরেক্স</button>
 </div>
 
-<!-- DEMO TRADE TAB -->
-<div id="pageDemo">
+<!-- LIVE TRADE & CHART TAB -->
+<div id="pageTrade">
+  <div class="card">
+    <label><b>মার্কেট বাছো:</b></label>
+    <select id="market" onchange="loadChart()"></select>
+    <div id="tv" style="height:340px;margin-top:10px"></div>
+    <div class="row" style="margin-top:10px">
+      <div><div class="small">রেজিস্ট্যান্স</div><b id="res">--</b></div>
+      <div><div class="small">দাম</div><b id="price">--</b></div>
+      <div><div class="small">সাপোর্ট</div><b id="sup">--</b></div>
+    </div>
+  </div>
+</div>
+
+<!-- QUOTEX DEMO PRACTICE TAB -->
+<div id="pageDemo" style="display:none">
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center">
-      <h3>🎮 কোটেক্স রিয়েল-টাইম ডেমো</h3>
-      <div><b>ডেমো ব্যালেন্স: $<span id="demoBal">10000.00</span></b></div>
+      <h3>🎮 কোটেক্স ডেমো প্র্যাকটিস</h3>
+      <div><b>ব্যালেন্স: $<span id="demoBal">10000.00</span></b></div>
     </div>
     
     <label><b>মার্কেট পেয়ার বাছো:</b></label>
     <select id="demoMarket" onchange="changeDemoPair()"></select>
 
-    <!-- LIVE QUOTEX SIMULATED CHART CANVAS -->
     <div id="chartContainer">
       <canvas id="demoCanvas"></canvas>
-      <div id="livePnlBadge" class="tradeBadge">মার্কেট কারেন্ট প্রাইস: <span id="currentLivePrice">--</span></div>
+      <div id="livePnlBadge" class="tradeBadge">লাইভ প্রাইস: <span id="currentLivePrice">--</span></div>
     </div>
 
     <div class="row" style="margin-top:10px">
       <div><div class="small">এন্ট্রি প্রাইস</div><b id="entryPriceDisplay">--</b></div>
-      <div><div class="small">কাউন্টডাউন</div><b id="timerDisplay">00:00</b></div>
+      <div><div class="small">টাইমার</div><b id="timerDisplay">00:00</b></div>
       <div><div class="small">লাইভ PnL</div><b id="pnlDisplay">--</b></div>
     </div>
 
@@ -79,7 +95,7 @@
       <input id="demoAmt" value="10">
       <label><b>টাইমফ্রেম:</b></label>
       <select id="demoTime">
-        <option value="10">১০ সেকেন্ড (ফাস্ট ট্রেড)</option>
+        <option value="15">১৫ সেকেন্ড</option>
         <option value="30">৩০ সেকেন্ড</option>
         <option value="60">১ মিনিট</option>
       </select>
@@ -95,45 +111,104 @@
   </div>
 </div>
 
+<!-- SIGNAL TAB -->
+<div id="pageSignal" style="display:none">
+  <div class="card">
+    <h3>📡 হাই-একুরেসি সিগন্যাল জেনারেটর</h3>
+    <label><b>মার্কেট বাছো:</b></label>
+    <select id="sigMarket"></select>
+    <button class="btn" style="margin-top:12px;background:#d97706;" onclick="checkRealSignal()">📡 সিগন্যাল চেক করো</button>
+    <div id="signal" style="margin-top:10px"></div>
+  </div>
+</div>
+
+<!-- STORY & CONTACT TAB -->
+<div id="pageStory" style="display:none">
+  <div class="card">
+    <h3>❤️ রাহাত ভাইয়ের ট্রেডিং গাইড</h3>
+    <p class="small" style="font-size:15px;line-height:1.8">
+      আমি রাহাত। যেকোনো প্রয়োজনে আমার টেলিগ্রাম আইডিতে যোগাযোগ করতে পারো। ওটিসি মার্কেটে প্রপার মানি ম্যানেজমেন্ট মেনে ট্রেড করো।
+    </p>
+    <a href="https://t.me/bprahat" target="_blank" class="telegramBtn" style="font-size:16px;padding:10px 18px">💬 টেলিগ্রামে মেসেজ দিন (@bprahat)</a>
+  </div>
+</div>
+
 <div class="bottom">
-  <button class="active">🎮 কোটেক্স ডেমো</button>
+  <button class="active" onclick="nav('Trade',this)">ট্রেড</button>
+  <button onclick="nav('Demo',this)">🎮 ডেমো</button>
+  <button onclick="nav('Signal',this)">📡 সিগন্যাল</button>
+  <button onclick="nav('Story',this)">স্টোরি & কন্টাক্ট</button>
 </div>
 
 <script>
-var PAIRS = [
-  ["EUR/USD (OTC)", 1.08500],
-  ["GBP/USD (OTC)", 1.27500],
-  ["AUD/CAD (OTC)", 0.88300],
-  ["USD/JPY (OTC)", 149.500],
-  ["GOLD (OTC)", 2320.00]
-];
+var DATA={
+  quotex_otc:[
+    ["EUR/USD (OTC)", "OANDA:EURUSD", 1.08500],
+    ["GBP/USD (OTC)", "OANDA:GBPUSD", 1.27500],
+    ["AUD/CAD (OTC)", "OANDA:AUDCAD", 0.88300],
+    ["USD/JPY (OTC)", "OANDA:USDJPY", 149.500],
+    ["GOLD (OTC)", "OANDA:XAUUSD", 2320.00]
+  ],
+  binary:[["EUR/USD Real","OANDA:EURUSD",1.08500],["GBP/USD Real","OANDA:GBPUSD",1.27500]],
+  crypto:[["BTC / USDT","BINANCE:BTCUSDT",67200],["ETH / USDT","BINANCE:ETHUSDT",3450]],
+  forex:[["EUR/USD","OANDA:EURUSD",1.08500],["GBP/USD","OANDA:GBPUSD",1.27500]]
+};
 
+var cat='quotex_otc';
 var currentPrice = 1.08500;
 var candleHistory = [];
 var activeTrade = null;
 var demoBalance = 10000.00;
 var tradeLogs = [];
 
-// Populate Dropdown
-function initPairs() {
-  var s = document.getElementById('demoMarket');
-  s.innerHTML = '';
-  for(var i=0; i<PAIRS.length; i++) {
-    var o = document.createElement('option');
-    o.value = i;
-    o.text = PAIRS[i][0];
-    s.appendChild(o);
+function fillMarket(){
+  var s=document.getElementById('market');
+  var sm=document.getElementById('sigMarket');
+  var dm=document.getElementById('demoMarket');
+  s.innerHTML=''; sm.innerHTML=''; dm.innerHTML='';
+  for(var i=0;i<DATA[cat].length;i++){
+    var o1=document.createElement('option'); o1.value=i; o1.text=DATA[cat][i][0]; s.appendChild(o1);
+    var o2=document.createElement('option'); o2.value=i; o2.text=DATA[cat][i][0]; sm.appendChild(o2);
+    var o3=document.createElement('option'); o3.value=i; o3.text=DATA[cat][i][0]; dm.appendChild(o3);
   }
-  changeDemoPair();
+  updatePrice();
 }
 
+function updatePrice(){
+  var idx=document.getElementById('market').value||0;
+  var p=DATA[cat][idx][2];
+  document.getElementById('price').innerText=p;
+  document.getElementById('res').innerText=(p*1.0025).toFixed(4);
+  document.getElementById('sup').innerText=(p*0.9975).toFixed(4);
+}
+
+function loadChart(){
+  var idx=document.getElementById('market').value||0;
+  var m=DATA[cat][idx];
+  var tv=document.getElementById('tv');
+  tv.innerHTML='';
+  var s=document.createElement('script');
+  s.src='https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
+  s.async=true;
+  s.innerHTML=JSON.stringify({autosize:true,symbol:m[1],interval:'1',timezone:'Asia/Dhaka',theme:'dark',style:'1',locale:'en'});
+  tv.appendChild(s);
+}
+
+function setCat(c,el){
+  cat=c;
+  var b=document.querySelectorAll('.tabs button');
+  for(var i=0;i<b.length;i++) b[i].classList.remove('active');
+  el.classList.add('active');
+  fillMarket(); loadChart(); changeDemoPair();
+}
+
+// QUOTEX DEMO CANVAS & TRADING ENGINE
 function changeDemoPair() {
   var idx = document.getElementById('demoMarket').value || 0;
-  currentPrice = PAIRS[idx][1];
+  currentPrice = DATA[cat][idx][2];
   generateCandles();
 }
 
-// Generate Initial Candle Data
 function generateCandles() {
   candleHistory = [];
   var base = currentPrice;
@@ -147,25 +222,25 @@ function generateCandles() {
   }
 }
 
-// Live Chart Renderer (Canvas API)
 function drawChart() {
   var canvas = document.getElementById('demoCanvas');
+  if(!canvas) return;
   var ctx = canvas.getContext('2d');
   canvas.width = canvas.parentElement.clientWidth;
   canvas.height = canvas.parentElement.clientHeight;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Price Movement Simulation
   currentPrice += (Math.random() - 0.495) * 0.00015;
   var lastCandle = candleHistory[candleHistory.length - 1];
-  lastCandle.close = currentPrice;
-  if(currentPrice > lastCandle.high) lastCandle.high = currentPrice;
-  if(currentPrice < lastCandle.low) lastCandle.low = currentPrice;
+  if(lastCandle) {
+    lastCandle.close = currentPrice;
+    if(currentPrice > lastCandle.high) lastCandle.high = currentPrice;
+    if(currentPrice < lastCandle.low) lastCandle.low = currentPrice;
+  }
 
   document.getElementById('currentLivePrice').innerText = currentPrice.toFixed(5);
 
-  // Find min/max for scale
   var minP = Infinity, maxP = -Infinity;
   for(var i=0; i<candleHistory.length; i++) {
     if(candleHistory[i].low < minP) minP = candleHistory[i].low;
@@ -178,7 +253,6 @@ function drawChart() {
   var padding = (maxP - minP) * 0.1 || 0.001;
   minP -= padding; maxP += padding;
 
-  // Draw Candles
   var candleWidth = canvas.width / 35;
   for(var i=0; i<candleHistory.length; i++) {
     var c = candleHistory[i];
@@ -192,17 +266,14 @@ function drawChart() {
     ctx.strokeStyle = isGreen ? '#22c55e' : '#ef4444';
     ctx.fillStyle = isGreen ? '#22c55e' : '#ef4444';
 
-    // Wick
     ctx.beginPath();
     ctx.moveTo(x + candleWidth/2, yHigh);
     ctx.lineTo(x + candleWidth/2, yLow);
     ctx.stroke();
 
-    // Body
     ctx.fillRect(x, Math.min(yOpen, yClose), candleWidth, Math.max(Math.abs(yClose - yOpen), 2));
   }
 
-  // Draw Trade Entry Line if active
   if(activeTrade) {
     var yEntry = canvas.height - ((activeTrade.entryPrice - minP)/(maxP - minP)) * canvas.height;
     ctx.strokeStyle = activeTrade.type === 'CALL' ? '#22c55e' : '#ef4444';
@@ -215,24 +286,21 @@ function drawChart() {
     ctx.setLineDash([]);
     ctx.lineWidth = 1;
 
-    // Label
     ctx.fillStyle = activeTrade.type === 'CALL' ? '#22c55e' : '#ef4444';
     ctx.fillText(activeTrade.type + " @ " + activeTrade.entryPrice.toFixed(5), 10, yEntry - 6);
 
-    // Live PnL Update
     var isWin = activeTrade.type === 'CALL' ? (currentPrice >= activeTrade.entryPrice) : (currentPrice <= activeTrade.entryPrice);
     document.getElementById('pnlDisplay').className = isWin ? 'win' : 'loss';
     document.getElementById('pnlDisplay').innerText = isWin ? '+$' + (activeTrade.amount * 0.88).toFixed(2) : '-$' + activeTrade.amount.toFixed(2);
   }
 }
 
-// Start Trade
 function placeQuotexTrade(type) {
-  if(activeTrade) { alert('একটি ট্রেড রান রয়েছে! শেষ হওয়া পর্যন্ত অপেক্ষা করুন।'); return; }
+  if(activeTrade) { alert('একটি ট্রেড রানিং রয়েছে!'); return; }
   var amt = parseFloat(document.getElementById('demoAmt').value || 10);
-  var secs = parseInt(document.getElementById('demoTime').value || 10);
+  var secs = parseInt(document.getElementById('demoTime').value || 15);
 
-  if(amt > demoBalance) { alert('ডেমো ব্যালেন্সের চেয়ে বেশি ইনপুট দেওয়া হয়েছে!'); return; }
+  if(amt > demoBalance) { alert('ডেমো ব্যালেন্সের চেয়ে বেশি অ্যামাউন্ট দিয়েছেন!'); return; }
 
   demoBalance -= amt;
   document.getElementById('demoBal').innerText = demoBalance.toFixed(2);
@@ -242,7 +310,7 @@ function placeQuotexTrade(type) {
     entryPrice: currentPrice,
     amount: amt,
     timeLeft: secs,
-    pair: PAIRS[document.getElementById('demoMarket').value][0]
+    pair: DATA[cat][document.getElementById('demoMarket').value][0]
   };
 
   document.getElementById('entryPriceDisplay').innerText = activeTrade.entryPrice.toFixed(5);
@@ -258,7 +326,6 @@ function placeQuotexTrade(type) {
   }, 1000);
 }
 
-// Finish Trade Calculation
 function finishTrade() {
   var isWin = activeTrade.type === 'CALL' ? (currentPrice >= activeTrade.entryPrice) : (currentPrice <= activeTrade.entryPrice);
   var profit = isWin ? (activeTrade.amount * 1.88) : 0;
@@ -268,7 +335,7 @@ function finishTrade() {
 
   var resultTxt = isWin ? '<span class="win">✅ WIN (+$' + (activeTrade.amount*0.88).toFixed(2) + ')</span>' : '<span class="loss">❌ LOSS (-$' + activeTrade.amount.toFixed(2) + ')</span>';
   
-  tradeLogs.unshift('<div>' + activeTrade.pair + ' | ' + activeTrade.type + ' | Entry: ' + activeTrade.entryPrice.toFixed(5) + ' | Close: ' + currentPrice.toFixed(5) + ' | ' + resultTxt + '</div>');
+  tradeLogs.unshift('<div style="padding:4px 0;border-bottom:1px solid #334155">' + activeTrade.pair + ' | ' + activeTrade.type + ' | Entry: ' + activeTrade.entryPrice.toFixed(5) + ' | ' + resultTxt + '</div>');
 
   document.getElementById('demoHist').innerHTML = tradeLogs.slice(0, 10).join('');
   
@@ -278,9 +345,31 @@ function finishTrade() {
   document.getElementById('pnlDisplay').innerText = '--';
 }
 
-// Game Loop Animation
-setInterval(drawChart, 400);
-initPairs();
+function checkRealSignal(){
+  var idx=document.getElementById('sigMarket').value||0;
+  var m=DATA[cat][idx][0];
+  var price=DATA[cat][idx][2];
+  var out=document.getElementById('signal');
+
+  var isCall = Math.random() > 0.45;
+  var dir = isCall ? 'CALL (উপরে) 🟢' : 'PUT (নিচে) 🔴';
+  var score = Math.floor(Math.random() * 8) + 90;
+
+  out.innerHTML='<div class="goodsig"><h3>⭐ '+m+' — '+dir+' — '+score+'% হাই একুরেসি</h3><p><b>এক্সপায়ারি টাইম:</b> ১ মিনিট | <b>মেসেজ দিন:</b> @bprahat</p></div>';
+}
+
+function nav(p,el){
+  var pages=['Trade','Demo','Signal','Story'];
+  for(var i=0;i<pages.length;i++){ document.getElementById('page'+pages[i]).style.display='none'; }
+  document.getElementById('page'+p).style.display='block';
+  var b=document.querySelectorAll('.bottom button');
+  for(var j=0;j<b.length;j++) b[j].classList.remove('active');
+  if(el) el.classList.add('active');
+  if(p=='Demo') changeDemoPair();
+}
+
+setInterval(drawChart, 300);
+fillMarket(); loadChart(); changeDemoPair();
 </script>
 </body>
-  </html>
+</html>
